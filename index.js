@@ -10,7 +10,7 @@ const message = "import statements should have an absolute path";
 
 module.exports = {
   rules: {
-    "no-relative-imports": {
+    "no-relative-import-paths": {
       create: function (context) {
         const { allowSameFolder } = context.options[0] || {};
 
