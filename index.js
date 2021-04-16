@@ -1,4 +1,4 @@
-function isRelative(path) {
+function isParentFolder(path) {
   return path.startsWith("../");
 }
 
@@ -17,7 +17,7 @@ module.exports = {
         return {
           ImportDeclaration: function (node) {
             const path = node.source.value;
-            if (isRelative(path)) {
+            if (isParentFolder(path)) {
               context.report({
                 node,
                 message: message,
