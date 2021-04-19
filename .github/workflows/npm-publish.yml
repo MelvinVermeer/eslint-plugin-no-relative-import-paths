@@ -36,4 +36,4 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
 
-      - run: git push --no-verify
+      - run: git push origin main --no-verify
