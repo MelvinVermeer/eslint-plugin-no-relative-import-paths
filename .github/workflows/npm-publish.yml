@@ -17,6 +17,9 @@ jobs:
           node-version: 12
           registry-url: https://registry.npmjs.org/
 
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
       - run: |
           sudo apt update
           sudo apt install jq -y
@@ -24,10 +27,10 @@ jobs:
       - run: |
           git config --local user.email "melvin.vermeer@gmail.com"
           git config --local user.name "Melvin Vermeer [ci]"
-          jq --arg version ${GITHUB_REF#refs/tags/} '.version = $version' package.json > package.json.tmp
+          jq --arg version $${{ env.RELEASE_VERSION }} '.version = $version' package.json > package.json.tmp
           mv package.json.tmp package.json
           git add package.json
-          git commit --no-verify -m "update package version ${GITHUB_REF#refs/tags/} [skip ci]"
+          git commit --no-verify -m "update package version ${{ env.RELEASE_VERSION }} [skip ci]"
 
       - run: npm publish
         env:
