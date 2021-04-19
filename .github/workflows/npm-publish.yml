@@ -18,8 +18,8 @@ jobs:
           registry-url: https://registry.npmjs.org/
 
       - run: |
-        sudo apt update
-        sudo apt install jq
+          sudo apt update
+          sudo apt install jq -y
 
       - run: |
         git config --local user.email "melvin.vermeer@gmail.com"
