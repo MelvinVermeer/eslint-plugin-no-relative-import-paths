@@ -1,6 +1,7 @@
 # eslint-plugin-no-relative-import-paths
 
-Moving a file to different folder, could result in changing all imports statement in that file. This will not happen is the import paths are absolute. The eslint rule helps enforcing having absolute import paths. 
+Moving a file to different folder, could result in changing all imports statement in that file. This will not happen is the import paths are absolute. The eslint rule helps enforcing having absolute import paths.
+Support eslint --fix to automatically change imports to absolute paths.  
 
 # Installation
 
