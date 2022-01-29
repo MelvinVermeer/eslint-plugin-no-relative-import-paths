@@ -15,12 +15,12 @@ function getAbsolutePath(relativePath, context) {
 const message = "import statements should have an absolute path";
 
 module.exports = {
-  meta: {
-    type: 'layout',
-    fixable: 'code',
-  },
   rules: {
     "no-relative-import-paths": {
+      meta: {
+        type: "layout",
+        fixable: "code",
+      },
       create: function (context) {
         const { allowSameFolder } = context.options[0] || {};
 
