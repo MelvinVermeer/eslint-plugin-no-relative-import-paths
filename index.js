@@ -1,4 +1,4 @@
-const path = require('path');
+const path = require("path");
 
 function isParentFolder(path) {
   return path.startsWith("../");
@@ -9,7 +9,13 @@ function isSameFolder(path) {
 }
 
 function getAbsolutePath(relativePath, context) {
-  return path.relative(context.getCwd(), path.join(path.dirname(context.getFilename()), relativePath));
+  return path
+    .relative(
+      context.getCwd(),
+      path.join(path.dirname(context.getFilename()), relativePath)
+    )
+    .split(path.sep)
+    .join("/");
 }
 
 const message = "import statements should have an absolute path";
@@ -32,7 +38,10 @@ module.exports = {
                 node,
                 message: message,
                 fix: function (fixer) {
-                  return fixer.replaceTextRange([node.source.range[0] + 1, node.source.range[1] - 1], getAbsolutePath(path, context));
+                  return fixer.replaceTextRange(
+                    [node.source.range[0] + 1, node.source.range[1] - 1],
+                    getAbsolutePath(path, context)
+                  );
                 },
               });
             }
@@ -42,7 +51,10 @@ module.exports = {
                 node,
                 message: message,
                 fix: function (fixer) {
-                  return fixer.replaceTextRange([node.source.range[0] + 1, node.source.range[1] - 1], getAbsolutePath(path, context));
+                  return fixer.replaceTextRange(
+                    [node.source.range[0] + 1, node.source.range[1] - 1],
+                    getAbsolutePath(path, context)
+                  );
                 },
               });
             }
