@@ -8,10 +8,10 @@ function isSameFolder(path) {
   return path.startsWith("./");
 }
 
-function getAbsolutePath(relativePath, context) {
+function getAbsolutePath(relativePath, context, rootDir) {
   return path
     .relative(
-      context.getCwd(),
+      context.getCwd() + (rootDir !== '' ? path.sep + rootDir : ''),
       path.join(path.dirname(context.getFilename()), relativePath)
     )
     .split(path.sep)
@@ -28,7 +28,7 @@ module.exports = {
         fixable: "code",
       },
       create: function (context) {
-        const { allowSameFolder } = context.options[0] || {};
+        const { allowSameFolder, rootDir } = context.options[0] || {};
 
         return {
           ImportDeclaration: function (node) {
@@ -40,7 +40,7 @@ module.exports = {
                 fix: function (fixer) {
                   return fixer.replaceTextRange(
                     [node.source.range[0] + 1, node.source.range[1] - 1],
-                    getAbsolutePath(path, context)
+                    getAbsolutePath(path, context, rootDir || '')
                   );
                 },
               });
@@ -53,7 +53,7 @@ module.exports = {
                 fix: function (fixer) {
                   return fixer.replaceTextRange(
                     [node.source.range[0] + 1, node.source.range[1] - 1],
-                    getAbsolutePath(path, context)
+                    getAbsolutePath(path, context, rootDir || '')
                   );
                 },
               });
