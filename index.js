@@ -1,7 +1,10 @@
 const path = require("path");
 
-function isParentFolder(path) {
-  return path.startsWith("../");
+function isParentFolder(relativeFilePath, context, rootDir) {
+  const absoluteRootPath = context.getCwd() + (rootDir !== '' ? path.sep + rootDir : '');
+  const absoluteFilePath = path.join(path.dirname(context.getFilename()), relativeFilePath)
+
+  return relativeFilePath.startsWith("../") && (rootDir === '' || absoluteFilePath.startsWith(absoluteRootPath));
 }
 
 function isSameFolder(path) {
@@ -33,7 +36,7 @@ module.exports = {
         return {
           ImportDeclaration: function (node) {
             const path = node.source.value;
-            if (isParentFolder(path)) {
+            if (isParentFolder(path, context, rootDir)) {
               context.report({
                 node,
                 message: message,
