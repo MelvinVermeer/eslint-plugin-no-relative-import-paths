@@ -1,17 +1,20 @@
 const path = require("path");
 
-function isParentFolder(path) {
-  return path.startsWith("../");
+function isParentFolder(relativeFilePath, context, rootDir) {
+  const absoluteRootPath = context.getCwd() + (rootDir !== '' ? path.sep + rootDir : '');
+  const absoluteFilePath = path.join(path.dirname(context.getFilename()), relativeFilePath)
+
+  return relativeFilePath.startsWith("../") && (rootDir === '' || absoluteFilePath.startsWith(absoluteRootPath));
 }
 
 function isSameFolder(path) {
   return path.startsWith("./");
 }
 
-function getAbsolutePath(relativePath, context) {
+function getAbsolutePath(relativePath, context, rootDir) {
   return path
     .relative(
-      context.getCwd(),
+      context.getCwd() + (rootDir !== '' ? path.sep + rootDir : ''),
       path.join(path.dirname(context.getFilename()), relativePath)
     )
     .split(path.sep)
@@ -28,19 +31,19 @@ module.exports = {
         fixable: "code",
       },
       create: function (context) {
-        const { allowSameFolder } = context.options[0] || {};
+        const { allowSameFolder, rootDir } = context.options[0] || {};
 
         return {
           ImportDeclaration: function (node) {
             const path = node.source.value;
-            if (isParentFolder(path)) {
+            if (isParentFolder(path, context, rootDir)) {
               context.report({
                 node,
                 message: message,
                 fix: function (fixer) {
                   return fixer.replaceTextRange(
                     [node.source.range[0] + 1, node.source.range[1] - 1],
-                    getAbsolutePath(path, context)
+                    getAbsolutePath(path, context, rootDir || '')
                   );
                 },
               });
@@ -53,7 +56,7 @@ module.exports = {
                 fix: function (fixer) {
                   return fixer.replaceTextRange(
                     [node.source.range[0] + 1, node.source.range[1] - 1],
-                    getAbsolutePath(path, context)
+                    getAbsolutePath(path, context, rootDir || '')
                   );
                 },
               });
