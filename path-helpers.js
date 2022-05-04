@@ -8,12 +8,12 @@ function isParentFolder(relativeFilePath, context, rootDir) {
     relativeFilePath
   );
 
-  return (
-    relativeFilePath.startsWith("../") &&
-    (rootDir === "" ||
-      (absoluteFilePath.startsWith(absoluteRootPath) &&
-        context.getFilename().startsWith(absoluteRootPath)))
-  );
+  const pathMatch =
+    rootDir === "" ||
+    (absoluteFilePath.startsWith(absoluteRootPath) &&
+      context.getFilename().startsWith(absoluteRootPath));
+
+  return relativeFilePath.startsWith("../") && pathMatch;
 }
 
 function isSameFolder(path) {
