@@ -5,12 +5,11 @@ const {
 } = require("./path-helpers");
 
 const context = {
-  getCwd: () => "/Users/dev/eslint-plugin-no-relative-import-paths",
+  getCwd: () =>
+    "/Users/dev/eslint-plugin-no-relative-import-paths/test-project",
   getFilename: () =>
-    "/Users/dev/eslint-plugin-no-relative-import-paths/coverage/lcov-report/index.html",
+    "/Users/dev/eslint-plugin-no-relative-import-paths/test-project/index.ts",
 };
-
-// CWD: /Users/melvin/dev/eslint-plugin-no-relative-import-paths
 
 describe("isParentFolder", () => {
   test("true when ../ - need detailing", () => {
