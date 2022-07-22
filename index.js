@@ -36,8 +36,8 @@ module.exports = {
       },
       create: function (context) {
         const { allowSameFolder, rootDir } = {
-          allowSameFolder: context.options[0].allowSameFolder || false,
-          rootDir: context.options[0].rootDir || '',
+          allowSameFolder: context.options[0]?.allowSameFolder || false,
+          rootDir: context.options[0]?.rootDir || '',
         };
 
         return {
