@@ -100,7 +100,7 @@ import Something from "src/components/something";
 ```
 
 ```js
-// when configured as { "prefix": "@/" }
+// when configured as { "prefix": "@" }
 import Something from "../../components/something";
 
 // will result in
