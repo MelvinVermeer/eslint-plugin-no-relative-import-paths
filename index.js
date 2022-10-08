@@ -15,14 +15,16 @@ function isSameFolder(path) {
   return path.startsWith("./");
 }
 
-function getAbsolutePath(relativePath, context, rootDir) {
-  return path
+function getAbsolutePath(relativePath, context, rootDir, prefix) {
+  return [
+    prefix,
+    ...path
     .relative(
       context.getCwd() + (rootDir !== '' ? path.sep + rootDir : ''),
       path.join(path.dirname(context.getFilename()), relativePath)
     )
     .split(path.sep)
-    .join("/");
+  ].join("/");
 }
 
 const message = "import statements should have an absolute path";
@@ -35,9 +37,10 @@ module.exports = {
         fixable: "code",
       },
       create: function (context) {
-        const { allowSameFolder, rootDir } = {
+        const { allowSameFolder, rootDir, prefix } = {
           allowSameFolder: context.options[0]?.allowSameFolder || false,
           rootDir: context.options[0]?.rootDir || '',
+          prefix: context.options[0]?.prefix || '',
         };
 
         return {
@@ -50,7 +53,7 @@ module.exports = {
                 fix: function (fixer) {
                   return fixer.replaceTextRange(
                     [node.source.range[0] + 1, node.source.range[1] - 1],
-                    getAbsolutePath(path, context, rootDir || '')
+                    getAbsolutePath(path, context, rootDir || '', prefix)
                   );
                 },
               });
@@ -63,7 +66,7 @@ module.exports = {
                 fix: function (fixer) {
                   return fixer.replaceTextRange(
                     [node.source.range[0] + 1, node.source.range[1] - 1],
-                    getAbsolutePath(path, context, rootDir || '')
+                    getAbsolutePath(path, context, rootDir || '', prefix)
                   );
                 },
               });
