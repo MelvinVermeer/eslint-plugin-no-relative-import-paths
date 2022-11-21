@@ -39,7 +39,7 @@ Add the plugin to the plugins section, and configure the rule options.
 ...
 "no-relative-import-paths/no-relative-import-paths": [
   "warn",
-  { "allowSameFolder": true, "rootDir": "src" }
+  { "allowSameFolder": true, "rootDir": "src", "prefix": "" }
 ]
 ...
 ```
@@ -85,3 +85,24 @@ import Something from "components/something";
 //                     ^- no 'src/' prefix is added
 ```
 
+### `prefix`
+
+Useful when auto-fixing and a prefix should be included in the absolute path.
+
+Examples of code for this rule:
+
+```js
+// when not configured:
+import Something from "../../components/something";
+
+// will result in
+import Something from "src/components/something";
+```
+
+```js
+// when configured as { "prefix": "@" }
+import Something from "../../components/something";
+
+// will result in
+import Something from "@/components/something";
+```
