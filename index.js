@@ -1,13 +1,13 @@
 const path = require("path");
 
 function isParentFolder(relativeFilePath, context, rootDir) {
-  const absoluteRootPath = context.getCwd() + (rootDir !== '' ? path.sep + rootDir : '');
+  const absoluteRootPath = path.join(context.getCwd(), rootDir);
   const absoluteFilePath = path.join(path.dirname(context.getFilename()), relativeFilePath)
 
   return relativeFilePath.startsWith("../") && (
     rootDir === '' ||
     (absoluteFilePath.startsWith(absoluteRootPath) &&
-    context.getFilename().startsWith(absoluteRootPath))
+      context.getFilename().startsWith(absoluteRootPath))
   );
 }
 
@@ -19,11 +19,11 @@ function getAbsolutePath(relativePath, context, rootDir, prefix) {
   return [
     prefix,
     ...path
-    .relative(
-      context.getCwd() + (rootDir !== '' ? path.sep + rootDir : ''),
-      path.join(path.dirname(context.getFilename()), relativePath)
-    )
-    .split(path.sep)
+      .relative(
+        path.join(context.getCwd(), rootDir),
+        path.join(path.dirname(context.getFilename()), relativePath)
+      )
+      .split(path.sep)
   ].filter(String).join("/");
 }
 
@@ -53,7 +53,7 @@ module.exports = {
                 fix: function (fixer) {
                   return fixer.replaceTextRange(
                     [node.source.range[0] + 1, node.source.range[1] - 1],
-                    getAbsolutePath(path, context, rootDir || '', prefix)
+                    getAbsolutePath(path, context, rootDir, prefix)
                   );
                 },
               });
@@ -66,7 +66,7 @@ module.exports = {
                 fix: function (fixer) {
                   return fixer.replaceTextRange(
                     [node.source.range[0] + 1, node.source.range[1] - 1],
-                    getAbsolutePath(path, context, rootDir || '', prefix)
+                    getAbsolutePath(path, context, rootDir, prefix)
                   );
                 },
               });
