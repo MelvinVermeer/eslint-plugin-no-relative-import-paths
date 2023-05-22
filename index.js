@@ -4,7 +4,7 @@ function isParentFolder(relativeFilePath, context, rootDir) {
   const absoluteRootPath = context.getCwd() + (rootDir !== '' ? path.sep + rootDir : '');
   const absoluteFilePath = path.join(path.dirname(context.getFilename()), relativeFilePath)
 
-  return relativeFilePath.startsWith("../") && (
+  return relativeFilePath.startsWith(".." + path.sep) && (
     rootDir === '' ||
     (absoluteFilePath.startsWith(absoluteRootPath) &&
     context.getFilename().startsWith(absoluteRootPath))
@@ -12,7 +12,7 @@ function isParentFolder(relativeFilePath, context, rootDir) {
 }
 
 function isSameFolder(path) {
-  return path.startsWith("./");
+  return path.startsWith("." + path.sep);
 }
 
 function getAbsolutePath(relativePath, context, rootDir, prefix) {
@@ -24,7 +24,7 @@ function getAbsolutePath(relativePath, context, rootDir, prefix) {
       path.join(path.dirname(context.getFilename()), relativePath)
     )
     .split(path.sep)
-  ].filter(String).join("/");
+  ].filter(String).join(path.sep);
 }
 
 const message = "import statements should have an absolute path";
