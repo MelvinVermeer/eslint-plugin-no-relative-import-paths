@@ -37,19 +37,19 @@ module.exports = {
         fixable: "code",
         schema: {
           type: "array",
-        	minItems: 0,
-        	maxItems: 1,
-        	items: [
-        		{
-        			type: "object",
-        			properties: {
-        				allowSameFolder: { type: "boolean" },
-        				rootDir: { type: "string" },
-        				prefix: { type: "string" },
-        			},
-        			additionalProperties: false,
-        		},
-        	],
+          minItems: 0,
+          maxItems: 1,
+          items: [
+            {
+              type: "object",
+              properties: {
+                allowSameFolder: { type: "boolean" },
+                rootDir: { type: "string" },
+                prefix: { type: "string" },
+              },
+              additionalProperties: false,
+            },
+          ],
         },
       },
       create: function (context) {
