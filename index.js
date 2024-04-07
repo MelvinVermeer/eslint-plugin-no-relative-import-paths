@@ -35,6 +35,22 @@ module.exports = {
       meta: {
         type: "layout",
         fixable: "code",
+        schema: {
+          type: "array",
+          minItems: 0,
+          maxItems: 1,
+          items: [
+            {
+              type: "object",
+              properties: {
+                allowSameFolder: { type: "boolean" },
+                rootDir: { type: "string" },
+                prefix: { type: "string" },
+              },
+              additionalProperties: false,
+            },
+          ],
+        },
       },
       create: function (context) {
         const { allowSameFolder, rootDir, prefix } = {
