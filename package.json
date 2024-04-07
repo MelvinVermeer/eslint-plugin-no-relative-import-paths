@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-no-relative-import-paths",
-  "version": "v1.5.3",
+  "version": "v1.5.4",
   "description": "",
   "main": "index.js",
   "repository": {
