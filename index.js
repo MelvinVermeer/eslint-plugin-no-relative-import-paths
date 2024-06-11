@@ -15,6 +15,15 @@ function isSameFolder(path) {
   return path.startsWith("./");
 }
 
+function getRelativePathDepth(path) {
+  let depth = 0;
+  while (path.startsWith('../')) {
+    depth += 1;
+    path = path.substring(3)
+  }
+  return depth;
+}
+
 function getAbsolutePath(relativePath, context, rootDir, prefix) {
   return [
     prefix,
@@ -46,6 +55,7 @@ module.exports = {
                 allowSameFolder: { type: "boolean" },
                 rootDir: { type: "string" },
                 prefix: { type: "string" },
+                allowedDepth: { type: "number" },
               },
               additionalProperties: false,
             },
@@ -53,7 +63,8 @@ module.exports = {
         },
       },
       create: function (context) {
-        const { allowSameFolder, rootDir, prefix } = {
+        const { allowedDepth, allowSameFolder, rootDir, prefix } = {
+          allowedDepth: context.options[0]?.allowedDepth,
           allowSameFolder: context.options[0]?.allowSameFolder || false,
           rootDir: context.options[0]?.rootDir || '',
           prefix: context.options[0]?.prefix || '',
@@ -63,16 +74,18 @@ module.exports = {
           ImportDeclaration: function (node) {
             const path = node.source.value;
             if (isParentFolder(path, context, rootDir)) {
-              context.report({
-                node,
-                message: message,
-                fix: function (fixer) {
-                  return fixer.replaceTextRange(
-                    [node.source.range[0] + 1, node.source.range[1] - 1],
-                    getAbsolutePath(path, context, rootDir, prefix)
-                  );
-                },
-              });
+              if (typeof allowedDepth === 'undefined' || getRelativePathDepth(path) > allowedDepth) {
+                context.report({
+                  node,
+                  message: message,
+                  fix: function (fixer) {
+                    return fixer.replaceTextRange(
+                      [node.source.range[0] + 1, node.source.range[1] - 1],
+                      getAbsolutePath(path, context, rootDir, prefix)
+                    );
+                  },
+                });
+              }
             }
 
             if (isSameFolder(path) && !allowSameFolder) {
