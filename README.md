@@ -106,3 +106,30 @@ import Something from "../../components/something";
 // will result in
 import Something from "@/components/something";
 ```
+
+### `allowedDepth`
+
+Used to allow some relative imports of certain depths.
+
+Examples of code for this rule:
+
+```js
+// when configured as { "allowedDepth": 1 }
+
+// will NOT generate a warning
+import Something from "../components/something";
+
+// will generate a warning
+import Something from "../../components/something";
+```
+
+```js
+// when configured as { "allowedDepth": 2 }
+
+// will NOT generate a warning
+import Something from "../../components/something";
+
+// will generate a warning
+import Something from "../../../components/something";
+```
+
