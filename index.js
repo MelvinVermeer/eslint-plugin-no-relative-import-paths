@@ -12,7 +12,7 @@ function isParentFolder(relativeFilePath, context, rootDir) {
 }
 
 function isSameFolder(path) {
-  return path.startsWith("./");
+  return path.startsWith("./") || path === ".";
 }
 
 function getRelativePathDepth(path) {
