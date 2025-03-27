@@ -1,104 +1,155 @@
-const path = require("path");
+const pathLib = require('path');
 
+const parentFolderRegExp = /^(?:\.\/)?\.\./;
+const sameFolderRegExp = /^\.$|^\.\/(?!\.\.)/;
+
+/**
+ * @param {string} relativeFilePath
+ * @param {*} context
+ * @param {string} rootDir
+ * @returns {boolean}
+ */
 function isParentFolder(relativeFilePath, context, rootDir) {
-  const absoluteRootPath = path.join(context.getCwd(), rootDir);
-  const absoluteFilePath = path.join(path.dirname(context.getFilename()), relativeFilePath)
+  const absoluteRootPath = pathLib.join(context.getCwd(), rootDir);
+  const absoluteFilePath = pathLib.join(
+    pathLib.dirname(context.getFilename()),
+    relativeFilePath
+  );
 
-  return relativeFilePath.startsWith("../") && (
-    rootDir === '' ||
-    (absoluteFilePath.startsWith(absoluteRootPath) &&
-      context.getFilename().startsWith(absoluteRootPath))
+  return (
+    parentFolderRegExp.test(relativeFilePath) &&
+    (rootDir === '' ||
+      (absoluteFilePath.startsWith(absoluteRootPath) &&
+        context.getFilename().startsWith(absoluteRootPath)))
   );
 }
 
+/**
+ * @param {string} path
+ * @returns {boolean}
+ */
 function isSameFolder(path) {
-  return path.startsWith("./");
+  return sameFolderRegExp.test(path);
 }
 
+/**
+ * @param {string} path
+ * @returns {number}
+ */
 function getRelativePathDepth(path) {
+  let subPath = path;
   let depth = 0;
-  while (path.startsWith('../')) {
-    depth += 1;
-    path = path.substring(3)
+
+  while (parentFolderRegExp.test(subPath)) {
+    depth++;
+    subPath = subPath.substring(3);
   }
+
   return depth;
 }
 
-function getAbsolutePath(relativePath, context, rootDir, prefix) {
-  return [
-    prefix,
-    ...path
-      .relative(
-        path.join(context.getCwd(), rootDir),
-        path.join(path.dirname(context.getFilename()), relativePath)
-      )
-      .split(path.sep)
-  ].filter(String).join("/");
+/**
+ * @param {string} relativePath
+ * @param {*} context
+ * @param {string} rootDir
+ * @param {[string, string]} pathsEntries
+ * @returns {string}
+ */
+function getAbsolutePath(relativePath, context, rootDir, pathsEntries) {
+  const absolutePath = pathLib
+    .relative(
+      pathLib.join(context.getCwd(), rootDir),
+      pathLib.join(pathLib.dirname(context.getFilename()), relativePath)
+    )
+    .split(pathLib.sep)
+    .filter((path) => !!path)
+    .join('/');
+
+  for (const [alias, topPath] of pathsEntries) {
+    if (absolutePath.startsWith(topPath)) {
+      return absolutePath.replace(topPath, alias);
+    }
+  }
+
+  return absolutePath;
 }
 
-const message = "import statements should have an absolute path";
+const message = 'Import statements should have an absolute path!';
 
 module.exports = {
   rules: {
-    "no-relative-import-paths": {
+    'no-relative-import-paths': {
       meta: {
-        type: "layout",
-        fixable: "code",
+        type: 'layout',
+        fixable: 'code',
         schema: {
-          type: "array",
+          type: 'array',
           minItems: 0,
           maxItems: 1,
           items: [
             {
-              type: "object",
+              type: 'object',
               properties: {
-                allowSameFolder: { type: "boolean" },
-                rootDir: { type: "string" },
-                prefix: { type: "string" },
-                allowedDepth: { type: "number" },
+                allowedDepth: { type: 'number' },
+                allowSameFolder: { type: 'boolean' },
+                rootDir: { type: 'string' },
+                paths: {
+                  type: 'object',
+                  patternProperties: {
+                    '.*': { type: 'string' },
+                  },
+                },
               },
               additionalProperties: false,
             },
           ],
         },
       },
-      create: function (context) {
-        const { allowedDepth, allowSameFolder, rootDir, prefix } = {
-          allowedDepth: context.options[0]?.allowedDepth,
-          allowSameFolder: context.options[0]?.allowSameFolder || false,
-          rootDir: context.options[0]?.rootDir || '',
-          prefix: context.options[0]?.prefix || '',
-        };
+      create(context) {
+        /** @type {number | undefined} */
+        const allowedDepth = context.options[0]?.allowedDepth;
+        /** @type {boolean} */
+        const allowSameFolder = context.options[0]?.allowSameFolder || false;
+        /** @type {string} */
+        const rootDir = context.options[0]?.rootDir || '';
+        /** @type {Object<string, string>} */
+        const paths = context.options[0]?.paths || [];
+        const pathsEntries = Object.entries(paths);
 
         return {
-          ImportDeclaration: function (node) {
+          ImportDeclaration(node) {
+            /** @type {string} */
             const path = node.source.value;
+
             if (isParentFolder(path, context, rootDir)) {
-              if (typeof allowedDepth === 'undefined' || getRelativePathDepth(path) > allowedDepth) {
+              if (
+                typeof allowedDepth === 'undefined' ||
+                getRelativePathDepth(path) > allowedDepth
+              ) {
                 context.report({
                   node,
-                  message: message,
-                  fix: function (fixer) {
+                  message,
+                  fix(fixer) {
                     return fixer.replaceTextRange(
                       [node.source.range[0] + 1, node.source.range[1] - 1],
-                      getAbsolutePath(path, context, rootDir, prefix)
+                      getAbsolutePath(path, context, rootDir, pathsEntries)
                     );
                   },
                 });
               }
-            }
-
-            if (isSameFolder(path) && !allowSameFolder) {
-              context.report({
-                node,
-                message: message,
-                fix: function (fixer) {
-                  return fixer.replaceTextRange(
-                    [node.source.range[0] + 1, node.source.range[1] - 1],
-                    getAbsolutePath(path, context, rootDir, prefix)
-                  );
-                },
-              });
+            } else {
+              if (!allowSameFolder && isSameFolder(path)) {
+                context.report({
+                  node,
+                  message,
+                  fix(fixer) {
+                    return fixer.replaceTextRange(
+                      [node.source.range[0] + 1, node.source.range[1] - 1],
+                      getAbsolutePath(path, context, rootDir, pathsEntries)
+                    );
+                  },
+                });
+              }
             }
           },
         };
