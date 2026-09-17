@@ -1,13 +1,13 @@
 const path = require("path");
 
 function isParentFolder(relativeFilePath, context, rootDir) {
-  const absoluteRootPath = path.join(context.getCwd(), rootDir);
-  const absoluteFilePath = path.join(path.dirname(context.getFilename()), relativeFilePath)
+  const absoluteRootPath = path.join(context.getCwd?.() ?? context.cwd, rootDir);
+  const absoluteFilePath = path.join(path.dirname(context.getFilename?.() ?? context.filename), relativeFilePath)
 
   return relativeFilePath.startsWith("../") && (
     rootDir === '' ||
     (absoluteFilePath.startsWith(absoluteRootPath) &&
-      context.getFilename().startsWith(absoluteRootPath))
+      (context.getFilename?.() ?? context.filename).startsWith(absoluteRootPath))
   );
 }
 
@@ -29,8 +29,8 @@ function getAbsolutePath(relativePath, context, rootDir, prefix) {
     prefix,
     ...path
       .relative(
-        path.join(context.getCwd(), rootDir),
-        path.join(path.dirname(context.getFilename()), relativePath)
+        path.join(context.getCwd?.() ?? context.cwd, rootDir),
+        path.join(path.dirname(context.getFilename?.() ?? context.filename), relativePath)
       )
       .split(path.sep)
   ].filter(String).join("/");
