@@ -33,7 +33,7 @@ function getAbsolutePath(relativePath, context, rootDir, prefix) {
         path.join(path.dirname(context.getFilename?.() ?? context.filename), relativePath)
       )
       .split(path.sep)
-  ].filter(String).join("/");
+  ].filter(String).join("/").replace(/^\/\//, '/');
 }
 
 const message = "import statements should have an absolute path";
