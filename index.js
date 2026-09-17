@@ -24,7 +24,7 @@ function getRelativePathDepth(path) {
   return depth;
 }
 
-function getAbsolutePath(relativePath, context, rootDir, prefix) {
+function getAbsolutePath(relativePath, context, rootDir, prefix, noSlashAfterAt) {
   return [
     prefix,
     ...path
@@ -33,7 +33,7 @@ function getAbsolutePath(relativePath, context, rootDir, prefix) {
         path.join(path.dirname(context.getFilename?.() ?? context.filename), relativePath)
       )
       .split(path.sep)
-  ].filter(String).join("/");
+  ].filter(String).join("/").replace(noSlashAfterAt && prefix ? `/` : ``, ``);
 }
 
 const message = "import statements should have an absolute path";
@@ -56,6 +56,7 @@ module.exports = {
                 rootDir: { type: "string" },
                 prefix: { type: "string" },
                 allowedDepth: { type: "number" },
+                noSlashAfterAt: { type: "boolean" },
               },
               additionalProperties: false,
             },
@@ -63,11 +64,12 @@ module.exports = {
         },
       },
       create: function (context) {
-        const { allowedDepth, allowSameFolder, rootDir, prefix } = {
+        const { allowedDepth, allowSameFolder, rootDir, prefix, noSlashAfterAt } = {
           allowedDepth: context.options[0]?.allowedDepth,
           allowSameFolder: context.options[0]?.allowSameFolder || false,
           rootDir: context.options[0]?.rootDir || '',
           prefix: context.options[0]?.prefix || '',
+          noSlashAfterAt: context.options[0]?.noSlashAfterAt || false,
         };
 
         return {
@@ -81,7 +83,7 @@ module.exports = {
                   fix: function (fixer) {
                     return fixer.replaceTextRange(
                       [node.source.range[0] + 1, node.source.range[1] - 1],
-                      getAbsolutePath(path, context, rootDir, prefix)
+                      getAbsolutePath(path, context, rootDir, prefix, noSlashAfterAt)
                     );
                   },
                 });
@@ -95,7 +97,7 @@ module.exports = {
                 fix: function (fixer) {
                   return fixer.replaceTextRange(
                     [node.source.range[0] + 1, node.source.range[1] - 1],
-                    getAbsolutePath(path, context, rootDir, prefix)
+                    getAbsolutePath(path, context, rootDir, prefix, noSlashAfterAt)
                   );
                 },
               });

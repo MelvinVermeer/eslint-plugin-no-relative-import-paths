@@ -126,6 +126,26 @@ import Something from "../../components/something";
 import Something from "@/components/something";
 ```
 
+### `noSlashAfterAt` 
+
+When true, this option prevents the insertion of a slash (/) after the @ symbol in the alias during auto-fix. This is useful in projects where imports are configured without the slash.
+
+Examples of code for this rule:
+
+```js
+// when configured as { "prefix": "@", "noSlashAfterAt": false } (default behavior)
+import Something from "../../components/something";
+
+// will result in
+import Something from "@/components/something";
+
+// when configured as { "prefix": "@", "noSlashAfterAt": true }
+import Something from "../../components/something";
+
+// will result in
+import Something from "@components/something";
+```
+
 ### `allowedDepth`
 
 Used to allow some relative imports of certain depths.
