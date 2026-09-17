@@ -1,5 +1,6 @@
-# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
-# For more information see: https://help.github.com/actions/language-and-framework-guides/publishing-nodejs-packages
+# This workflow publishes the package to npm when a release is created.
+# Authentication uses npm trusted publishing (OIDC) — no NPM_TOKEN needed.
+# For more information see: https://docs.npmjs.com/trusted-publishers
 
 name: Node.js Package
 
@@ -10,12 +11,18 @@ on:
 jobs:
   publish-npm:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # push the version bump commit back to main
+      id-token: write # mint the OIDC token npm exchanges for publish rights
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org/
+
+      # Trusted publishing requires npm >= 11.5.1
+      - run: npm install -g npm@latest
 
       - name: Set env
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
@@ -35,7 +42,5 @@ jobs:
           git commit --no-verify -m "update package version ${{ env.RELEASE_VERSION }} [skip ci]"
 
       - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
 
       - run: git push origin main --no-verify
